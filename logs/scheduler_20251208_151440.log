@@ -1,0 +1,46 @@
+2025-12-08 15:14:51,907 [INFO] Solving instance with 12 tasks
+2025-12-08 15:14:51,946 [INFO] Restricted license - for non-production use only - expires 2027-11-29
+2025-12-08 15:14:51,984 [ERROR] Solver error
+Traceback (most recent call last):
+  File "C:\Users\j\Desktop\projet insat\Ro\scheduler_project\scheduler\threads.py", line 17, in run
+    solution, obj, _ = solve_multi_machine(self.tasks)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\j\Desktop\projet insat\Ro\scheduler_project\scheduler\model.py", line 75, in solve_multi_machine
+    s_val = S[i].X if S[i].X is not None else None
+                      ^^^^^^
+  File "src/gurobipy/var.pxi", line 128, in gurobipy._core.Var.__getattr__
+  File "src/gurobipy/var.pxi", line 156, in gurobipy._core.Var.getAttr
+  File "src/gurobipy/_attrutil.pyx", line 119, in gurobipy._attrutil._getattr
+AttributeError: Unable to retrieve attribute 'X'
+2025-12-08 15:14:52,068 [ERROR] Solver error: Unable to retrieve attribute 'X'
+2025-12-08 15:15:06,901 [INFO] Solving instance with 12 tasks
+2025-12-08 15:15:06,921 [ERROR] Solver error
+Traceback (most recent call last):
+  File "C:\Users\j\Desktop\projet insat\Ro\scheduler_project\scheduler\threads.py", line 17, in run
+    solution, obj, _ = solve_multi_machine(self.tasks)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\j\Desktop\projet insat\Ro\scheduler_project\scheduler\model.py", line 75, in solve_multi_machine
+    s_val = S[i].X if S[i].X is not None else None
+                      ^^^^^^
+  File "src/gurobipy/var.pxi", line 128, in gurobipy._core.Var.__getattr__
+  File "src/gurobipy/var.pxi", line 156, in gurobipy._core.Var.getAttr
+  File "src/gurobipy/_attrutil.pyx", line 119, in gurobipy._attrutil._getattr
+AttributeError: Unable to retrieve attribute 'X'
+2025-12-08 15:15:06,927 [ERROR] Solver error: Unable to retrieve attribute 'X'
+2025-12-08 15:15:19,094 [INFO] Solving instance with 6 tasks
+2025-12-08 15:15:19,131 [INFO] Solved. Obj=990.000
+2025-12-08 15:15:19,133 [INFO] Received solution with 6 items
+2025-12-08 15:15:59,707 [INFO] Solving instance with 10 tasks
+2025-12-08 15:15:59,725 [ERROR] Solver error
+Traceback (most recent call last):
+  File "C:\Users\j\Desktop\projet insat\Ro\scheduler_project\scheduler\threads.py", line 17, in run
+    solution, obj, _ = solve_multi_machine(self.tasks)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\j\Desktop\projet insat\Ro\scheduler_project\scheduler\model.py", line 75, in solve_multi_machine
+    s_val = S[i].X if S[i].X is not None else None
+                      ^^^^^^
+  File "src/gurobipy/var.pxi", line 128, in gurobipy._core.Var.__getattr__
+  File "src/gurobipy/var.pxi", line 156, in gurobipy._core.Var.getAttr
+  File "src/gurobipy/_attrutil.pyx", line 119, in gurobipy._attrutil._getattr
+AttributeError: Unable to retrieve attribute 'X'
+2025-12-08 15:15:59,730 [ERROR] Solver error: Unable to retrieve attribute 'X'

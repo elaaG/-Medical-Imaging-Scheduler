@@ -1,0 +1,9 @@
+2025-12-08 16:05:09,905 [INFO] Solving instance with 10 tasks
+2025-12-08 16:05:09,911 [INFO] Restricted license - for non-production use only - expires 2027-11-29
+2025-12-08 16:05:09,911 [INFO] Set parameter TimeLimit to value 30
+2025-12-08 16:05:09,929 [INFO] Solved. Obj=1853.00
+2025-12-08 16:05:09,935 [INFO] Received solution with 10 items
+2025-12-08 16:05:33,889 [INFO] Solving instance with 11 tasks
+2025-12-08 16:05:33,891 [INFO] Set parameter TimeLimit to value 30
+2025-12-08 16:05:33,906 [INFO] Solved. Obj=1938.00
+2025-12-08 16:05:33,909 [INFO] Received solution with 11 items
