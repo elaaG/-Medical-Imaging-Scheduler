@@ -1,4 +1,3 @@
-# scheduler/utils.py
 import json
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -44,7 +43,6 @@ def export_pdf(solution, path):
         pdf.savefig(fig)
         plt.close(fig)
 
-        # Table page
         df = pd.DataFrame([{'ID':s['id'],'Machine':s['machine'],'Start':s['start'],'End':s['end'],'Staff':s.get('staff_group','')} for s in solution])
         fig2, ax2 = plt.subplots(figsize=(11,6))
         ax2.axis('off')

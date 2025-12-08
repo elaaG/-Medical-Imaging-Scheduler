@@ -1,4 +1,3 @@
-# scheduler/threads.py
 from PySide6.QtCore import QThread, Signal
 from .model import solve_multi_machine
 import logging

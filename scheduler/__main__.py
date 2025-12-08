@@ -1,4 +1,3 @@
-# scheduler/main.py
 from scheduler.gui import MainWindow
 from PySide6.QtWidgets import QApplication
 from scheduler.utils import setup_logging

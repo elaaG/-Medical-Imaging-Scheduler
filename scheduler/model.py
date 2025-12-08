@@ -22,7 +22,6 @@ def solve_multi_machine(tasks, time_limit=30, objective="weighted_completion"):
     d = {i: tasks[i].get('deadline', None) for i in J}
     staff = {i: tasks[i].get('staff_group', None) for i in J}
 
-    # --- Setup times ---
     s = {i: {k: 0.0 for k in J} for i in J}
     for i in J:
         smap = tasks[i].get('setup_after', {}) or {}
@@ -31,7 +30,6 @@ def solve_multi_machine(tasks, time_limit=30, objective="weighted_completion"):
                 k = id_to_index[other_id]
                 s[i][k] = float(st)
 
-    # --- Compute a safer bigM ---
     bigM = sum(p[i] for i in J) + sum(max(max(s[i].values()),0) for i in J)
 
     # --- Model ---
@@ -47,7 +45,7 @@ def solve_multi_machine(tasks, time_limit=30, objective="weighted_completion"):
     # Makespan
     Cmax = model.addVar(vtype=GRB.CONTINUOUS, name='Cmax')
 
-    # --- Non-overlap: machine ---
+    # --- machine ---
     for i in J:
         for k in J:
             if i >= k: continue
@@ -55,7 +53,7 @@ def solve_multi_machine(tasks, time_limit=30, objective="weighted_completion"):
                 model.addConstr(S[i] + p[i] + s[i][k] <= S[k] + bigM*(1 - x[i,k]))
                 model.addConstr(S[k] + p[k] + s[k][i] <= S[i] + bigM*x[i,k])
 
-    # --- Non-overlap: staff ---
+    # ---  staff ---
     for i in J:
         for k in J:
             if i >= k: continue
@@ -69,26 +67,23 @@ def solve_multi_machine(tasks, time_limit=30, objective="weighted_completion"):
             if s[i][k] > 0:
                 model.addConstr(S[i] >= S[k] + p[k] + s[i][k])
 
-    # --- Release / deadline ---
+    # --- Release and  deadline ---
     for i in J:
         model.addConstr(S[i] >= r[i])
         if d[i] is not None:
             model.addConstr(S[i] + p[i] <= float(d[i]))
 
-    # --- Makespan constraint ---
+    # ---  constraint ---
     for i in J:
         model.addConstr(Cmax >= S[i] + p[i])
 
-    # --- Objective ---
     if objective == "makespan":
         model.setObjective(Cmax, GRB.MINIMIZE)
     else:
         model.setObjective(quicksum(w[i]*(S[i] + p[i]) for i in J), GRB.MINIMIZE)
 
-    # --- Optimize ---
     model.optimize()
 
-    # --- Extract solution ---
     solution = []
     if model.Status == GRB.OPTIMAL or model.Status == GRB.TIME_LIMIT:
         for i in J:

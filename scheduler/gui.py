@@ -1,4 +1,3 @@
-# scheduler/gui.py
 import json
 import logging
 from PySide6.QtWidgets import (
@@ -25,7 +24,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central)
         v = QVBoxLayout(central)
 
-        # --- Top toolbar ---
+       
         toolbar = QHBoxLayout()
         add_btn = QPushButton('➕ Ajouter patient')
         add_btn.clicked.connect(self.add_row)
@@ -53,7 +52,7 @@ class MainWindow(QMainWindow):
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         v.addWidget(self.table, 5)
 
-        # --- Lower area: Gantt + results ---
+        
         lower = QHBoxLayout()
         left = QVBoxLayout()
         self.gantt = GanttCanvas(self)
@@ -74,7 +73,6 @@ class MainWindow(QMainWindow):
         lower.addLayout(right,2)
         v.addLayout(lower,4)
 
-        # --- Footer search ---
         footer = QHBoxLayout()
         footer.addWidget(QLabel('Recherche ID:'))
         self.search_input = QLineEdit()
@@ -82,7 +80,6 @@ class MainWindow(QMainWindow):
         footer.addWidget(self.search_input)
         v.addLayout(footer)
 
-        # --- Load default example ---
         self.load_example()
 
     # --- Styles ---
@@ -170,7 +167,7 @@ class MainWindow(QMainWindow):
         self.table.setItem(r,8, QTableWidgetItem(''))
         
 
-    # --- Load example ---
+    # --- Lod example ---
     def load_example(self):
         sample = [
             {"id":"P1","duration":20,"machine":"IRM1","priority":5,"release":0,"staff_group":"TechA"},
@@ -196,7 +193,6 @@ class MainWindow(QMainWindow):
         
 
 
-    # --- Import JSON ---
     def import_json(self):
         path, _ = QFileDialog.getOpenFileName(self, 'Ouvrir JSON', '', 'JSON Files (*.json)')
         if not path: return
@@ -220,7 +216,6 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self,'Erreur import',str(e))
 
-    # --- Export JSON ---
     def export_json(self):
         tasks = self.read_table_tasks()
         if not tasks: return
@@ -229,7 +224,6 @@ class MainWindow(QMainWindow):
         export_json(tasks, path)
         QMessageBox.information(self,'Export','Exporté avec succès')
 
-    # --- Read tasks table ---
     def read_table_tasks(self):
         tasks = []
         for r in range(self.table.rowCount()):
@@ -304,14 +298,12 @@ class MainWindow(QMainWindow):
         if not path: return
         export_pdf(self._last_solution, path)
 
-    # --- Search ---
     def search_table(self, text):
         t = text.strip().lower()
         for r in range(self.table.rowCount()):
             idv = self.table.item(r,0).text().lower() if self.table.item(r,0) else ''
             self.table.setRowHidden(r, t not in idv)
 
-# --- Main ---
 def main():
     import sys
     from PySide6.QtWidgets import QApplication

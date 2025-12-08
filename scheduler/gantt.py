@@ -1,4 +1,3 @@
-# scheduler/gantt.py
 import matplotlib
 matplotlib.use("QtAgg")
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
