@@ -11,7 +11,10 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
 from scheduler.threads import SolveThread
 from scheduler.gantt import GanttCanvas
-from scheduler.utils import setup_logging, export_json, export_pdf
+from scheduler.utils import setup_logging, export_json, export_pdf, export_compare_pdf
+from PySide6.QtWidgets import QDialog, QFormLayout, QDoubleSpinBox, QTableWidgetItem, QGridLayout
+from scheduler.threads import CompareThread
+from scheduler.utils import export_json
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +32,7 @@ class MainWindow(QMainWindow):
 
        
         toolbar = QHBoxLayout()
-        add_btn = QPushButton('➕ Ajouter patient')
-        add_btn.clicked.connect(self.add_row)
-        load_btn = QPushButton('📂 Charger exemple')
-        load_btn.clicked.connect(self.load_example)
+        
         load_json_btn = QPushButton('🔁 Import JSON')
         load_json_btn.clicked.connect(self.import_json)
         export_json_btn = QPushButton('💾 Export JSON')
@@ -48,11 +48,27 @@ class MainWindow(QMainWindow):
             "Makespan", 
             "Multi-criteria (makespan + staff)"
         ])
+
         toolbar.addWidget(QLabel("Objectif:"))
         toolbar.addWidget(self.obj_selector)
+        self.alpha_spin = QDoubleSpinBox()
+        self.alpha_spin.setRange(0.0, 1000.0)
+        self.alpha_spin.setValue(1.0)
+        self.beta_spin = QDoubleSpinBox()
+        self.beta_spin.setRange(0.0, 1000.0)
+        self.beta_spin.setValue(0.5)
+        toolbar.addWidget(QLabel("α:"))
+        toolbar.addWidget(self.alpha_spin)
+        toolbar.addWidget(QLabel("β:"))
+        toolbar.addWidget(self.beta_spin)
+
+        self.compare_btn = QPushButton('🔍 Comparer objectifs')
+        self.compare_btn.clicked.connect(self.start_compare)
+        toolbar.addWidget(self.compare_btn)
 
 
-        for w in [add_btn, load_btn, load_json_btn, export_json_btn, self.solve_btn, self.pdf_btn]:
+
+        for w in [load_json_btn, export_json_btn, self.solve_btn, self.pdf_btn]:
             toolbar.addWidget(w)
         toolbar.addStretch()
         v.addLayout(toolbar)
@@ -91,7 +107,7 @@ class MainWindow(QMainWindow):
         footer.addWidget(self.search_input)
         v.addLayout(footer)
 
-        self.load_example()
+        
 
     # --- Styles ---
     def _apply_styles(self):
@@ -163,43 +179,8 @@ class MainWindow(QMainWindow):
 
 
 
-    # --- Add row ---
-    def add_row(self):
-        r = self.table.rowCount()
-        self.table.insertRow(r)
-        self.table.setItem(r,0, QTableWidgetItem(f'P{r+1}'))
-        self.table.setItem(r,1, QTableWidgetItem('20.0'))  
-        self.table.setItem(r,2, QTableWidgetItem('IRM1'))
-        self.table.setItem(r,3, QTableWidgetItem('1.0'))
-        self.table.setItem(r,4, QTableWidgetItem('0.0'))
-        self.table.setItem(r,5, QTableWidgetItem(''))  
-        self.table.setItem(r,6, QTableWidgetItem('TechA'))
-        self.table.setItem(r,7, QTableWidgetItem('{}'))  
-        self.table.setItem(r,8, QTableWidgetItem(''))  
 
-    # --- Load example ---
-    def load_example(self):
-        sample = [
-            {"id":"P1","duration":20,"machine":"IRM1","priority":5,"release":0,"staff_group":"TechA"},
-            {"id":"P2","duration":30,"machine":"IRM1","priority":2,"release":0,"staff_group":"TechA","setup_after":{"P1":5}},
-            {"id":"P3","duration":15,"machine":"Scanner1","priority":3,"release":10,"staff_group":"TechB"},
-            {"id":"P4","duration":45,"machine":"IRM2","priority":4,"release":0,"staff_group":"TechA"},
-            {"id":"P5","duration":25,"machine":"Scanner1","priority":1,"release":0,"staff_group":"TechB"},
-            {"id":"P6","duration":10,"machine":"IRM1","priority":10,"release":5,"staff_group":"TechA"}
-        ]
-        self.table.setRowCount(0)
-        for t in sample:
-            r = self.table.rowCount()
-            self.table.insertRow(r)
-            self.table.setItem(r,0,QTableWidgetItem(t['id']))
-            self.table.setItem(r,1,QTableWidgetItem(str(float(t['duration']))))
-            self.table.setItem(r,2,QTableWidgetItem(t['machine']))
-            self.table.setItem(r,3,QTableWidgetItem(str(float(t['priority']))))
-            self.table.setItem(r,4,QTableWidgetItem(str(float(t.get('release',0)))))
-            self.table.setItem(r,5,QTableWidgetItem(str(t.get('deadline',''))))
-            self.table.setItem(r,6,QTableWidgetItem(t.get('staff_group','')))
-            self.table.setItem(r,7,QTableWidgetItem(json.dumps(t.get('setup_after',{}))))
-            self.table.setItem(r,8,QTableWidgetItem(''))
+    
 
     def import_json(self):
         path, _ = QFileDialog.getOpenFileName(self, 'Ouvrir JSON', '', 'JSON Files (*.json)')
@@ -274,10 +255,7 @@ class MainWindow(QMainWindow):
         return tasks
 
     def _to_float(self, val, default=0.0):
-        """
-        Convert a value to float safely.
-        If conversion fails, return default.
-        """
+        
         if val is None or str(val).strip() == '':
             return default
         try:
@@ -343,6 +321,133 @@ class MainWindow(QMainWindow):
         for r in range(self.table.rowCount()):
             idv = self.table.item(r,0).text().lower() if self.table.item(r,0) else ''
             self.table.setRowHidden(r, t not in idv)
+
+    def start_compare(self):
+        tasks = self.read_table_tasks()
+        if not tasks:
+            QMessageBox.warning(self, "Comparer", "Aucune tâche valide.")
+            return
+
+        # define objectives to compare
+        alpha = float(self.alpha_spin.value())
+        beta = float(self.beta_spin.value())
+        objs = [
+            "makespan",
+            "weighted_completion",
+            f"weighted_sum:{alpha}:{beta}"
+        ]
+        kwargs_map = {
+            "makespan": {},
+            "weighted_completion": {},
+            f"weighted_sum:{alpha}:{beta}": {}
+        }
+
+        self.compare_btn.setEnabled(False)
+        self.progress.setVisible(True)
+        self.compare_thread = CompareThread(tasks, objectives=objs, time_limit=30, kwargs_per_obj=kwargs_map)
+        self.compare_thread.finished_signal.connect(self.on_compare_done)
+        self.compare_thread.error_signal.connect(self.on_error)
+        self.compare_thread.start()
+        self.info.setText("Comparaison en cours...")
+
+    def on_compare_done(self, results):
+        self.progress.setVisible(False)
+        self.compare_btn.setEnabled(True)
+        self.info.setText("Comparaison terminée")
+        # results: dict objective -> (sol, obj)
+        # create and show dialog
+        dlg = CompareDialog(self, results)
+        dlg.exec()
+
+class CompareDialog(QDialog):
+    def __init__(self, parent, results: dict):
+        super().__init__(parent)
+        self.setWindowTitle("Comparaison des objectifs")
+        self.resize(1000, 600)
+        layout = QVBoxLayout(self)
+
+        # top: two Gantt canvases side-by-side (take first two objectives)
+        objs = list(results.keys())
+        left_obj = objs[0]
+        right_obj = objs[1] if len(objs) > 1 else objs[0]
+
+        grid = QGridLayout()
+        self.gantt_left = GanttCanvas(self)
+        self.gantt_right = GanttCanvas(self)
+        grid.addWidget(QLabel(left_obj), 0, 0)
+        grid.addWidget(QLabel(right_obj), 0, 1)
+        grid.addWidget(self.gantt_left, 1, 0)
+        grid.addWidget(self.gantt_right, 1, 1)
+        layout.addLayout(grid, 3)
+
+        self.kpi_table = QTableWidget(0, 5)
+        self.kpi_table.setHorizontalHeaderLabels(['ID', f'Start ({left_obj})', f'Start ({right_obj})', 'Duration', 'Delta Start'])
+        layout.addWidget(self.kpi_table, 2)
+
+        footer = QHBoxLayout()
+        export_left_btn = QPushButton(f'Export {left_obj} JSON')
+        export_left_btn.clicked.connect(lambda: self._export_solution(results[left_obj][0]))
+        export_right_btn = QPushButton(f'Export {right_obj} JSON')
+        export_right_btn.clicked.connect(lambda: self._export_solution(results[right_obj][0]))
+
+        export_pdf_btn = QPushButton("Export PDF comparatif")
+        export_pdf_btn.clicked.connect(lambda: self._export_pdf(results, left_obj, right_obj))
+
+        footer.addWidget(export_left_btn)
+        footer.addWidget(export_right_btn)
+        footer.addWidget(export_pdf_btn)  
+        footer.addStretch()
+        layout.addLayout(footer)
+
+
+
+        self.populate(results, left_obj, right_obj)
+
+
+    def _export_pdf(self, results, left_obj, right_obj):
+        path, _ = QFileDialog.getSaveFileName(self, 'Exporter PDF comparatif','comparatif.pdf','PDF Files (*.pdf)')
+        if not path:
+            return
+        export_compare_pdf(results, left_obj, right_obj, path)
+        QMessageBox.information(self, 'Export PDF', 'PDF comparatif exporté avec succès')
+
+    def populate(self, results, left_obj, right_obj):
+        left_sol, left_val = results[left_obj]
+        right_sol, right_val = results[right_obj]
+        self.gantt_left.plot_gantt(left_sol, title=f'{left_obj} - Obj {left_val:.2f}' if left_val is not None else left_obj)
+        self.gantt_right.plot_gantt(right_sol, title=f'{right_obj} - Obj {right_val:.2f}' if right_val is not None else right_obj)
+
+        # build map id->start for quick compare
+        map_left = {s['id']: s for s in (left_sol or [])}
+        map_right = {s['id']: s for s in (right_sol or [])}
+        ids = sorted(set(map_left.keys()).union(map_right.keys()))
+        self.kpi_table.setRowCount(0)
+        for tid in ids:
+            l = map_left.get(tid, {})
+            r = map_right.get(tid, {})
+            lstart = l.get('start')
+            rstart = r.get('start')
+            dur = l.get('duration') or r.get('duration') or ''
+            delta = ''
+            if lstart is not None and rstart is not None:
+                delta = f"{(rstart - lstart):.2f}"
+            rr = self.kpi_table.rowCount()
+            self.kpi_table.insertRow(rr)
+            self.kpi_table.setItem(rr, 0, QTableWidgetItem(str(tid)))
+            self.kpi_table.setItem(rr, 1, QTableWidgetItem(f"{lstart:.2f}" if lstart is not None else ''))
+            self.kpi_table.setItem(rr, 2, QTableWidgetItem(f"{rstart:.2f}" if rstart is not None else ''))
+            self.kpi_table.setItem(rr, 3, QTableWidgetItem(str(dur)))
+            self.kpi_table.setItem(rr, 4, QTableWidgetItem(str(delta)))
+
+    def _export_solution(self, sol):
+        path, _ = QFileDialog.getSaveFileName(self, 'Enregistrer JSON','solution.json','JSON Files (*.json)')
+        if not path:
+            return
+        export_json(sol, path)
+        QMessageBox.information(self, 'Export', 'Exporté avec succès')
+
+
+
 
 def main():
     import sys
