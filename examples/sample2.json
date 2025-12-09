@@ -1,0 +1,7 @@
+[
+    {"id":"A","duration":20,"machine":"M1","priority":10,"release":0},
+    {"id":"B","duration":5,"machine":"M1","priority":1,"release":0},
+    {"id":"C","duration":30,"machine":"M1","priority":5,"release":10},
+    {"id":"D","duration":8,"machine":"M1","priority":9,"release":0},
+    {"id":"E","duration":15,"machine":"M2","priority":7,"release":0}
+]

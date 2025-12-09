@@ -1,0 +1,61 @@
+2025-12-09 08:53:01,895 [INFO] Solving instance with 5 tasks
+2025-12-09 08:53:01,903 [INFO] Restricted license - for non-production use only - expires 2027-11-29
+2025-12-09 08:53:01,909 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:53:01,920 [INFO] Solved. Obj=696.00
+2025-12-09 08:53:01,928 [INFO] Received solution with 5 items
+2025-12-09 08:53:25,071 [INFO] Solving instance with 5 tasks
+2025-12-09 08:53:25,071 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:53:25,096 [INFO] Solved. Obj=103.00
+2025-12-09 08:53:25,097 [INFO] Received solution with 5 items
+2025-12-09 08:53:41,492 [INFO] Solving instance with 5 tasks
+2025-12-09 08:53:41,497 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:53:41,503 [INFO] Solved. Obj=154.50
+2025-12-09 08:53:41,504 [INFO] Received solution with 5 items
+2025-12-09 08:53:56,096 [INFO] Solving instance with 5 tasks
+2025-12-09 08:53:56,096 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:53:56,103 [INFO] Solved. Obj=103.00
+2025-12-09 08:53:56,103 [INFO] Received solution with 5 items
+2025-12-09 08:53:57,172 [INFO] Solving instance with 5 tasks
+2025-12-09 08:53:57,176 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:53:57,178 [INFO] Solved. Obj=103.00
+2025-12-09 08:53:57,178 [INFO] Received solution with 5 items
+2025-12-09 08:54:00,304 [INFO] Solving instance with 5 tasks
+2025-12-09 08:54:00,309 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:54:00,313 [INFO] Solved. Obj=696.00
+2025-12-09 08:54:00,316 [INFO] Received solution with 5 items
+2025-12-09 08:54:27,422 [INFO] Solving instance with 5 tasks
+2025-12-09 08:54:27,422 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:54:27,427 [INFO] Solved. Obj=103.00
+2025-12-09 08:54:27,427 [INFO] Received solution with 5 items
+2025-12-09 08:55:09,111 [INFO] Solving instance with 5 tasks
+2025-12-09 08:55:09,111 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:55:09,117 [INFO] Solved. Obj=154.50
+2025-12-09 08:55:09,117 [INFO] Received solution with 5 items
+2025-12-09 08:56:25,984 [INFO] Solving instance with 5 tasks
+2025-12-09 08:56:25,984 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:56:26,025 [INFO] Solved. Obj=102.00
+2025-12-09 08:56:26,026 [INFO] Received solution with 5 items
+2025-12-09 08:56:33,346 [INFO] Solving instance with 5 tasks
+2025-12-09 08:56:33,350 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:56:33,356 [INFO] Solved. Obj=805.00
+2025-12-09 08:56:33,357 [INFO] Received solution with 5 items
+2025-12-09 08:56:37,739 [INFO] Solving instance with 5 tasks
+2025-12-09 08:56:37,741 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:56:37,763 [INFO] Solved. Obj=63.00
+2025-12-09 08:56:37,764 [INFO] Received solution with 5 items
+2025-12-09 08:56:40,956 [INFO] Solving instance with 5 tasks
+2025-12-09 08:56:40,956 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:56:40,988 [INFO] Solved. Obj=102.00
+2025-12-09 08:56:40,989 [INFO] Received solution with 5 items
+2025-12-09 08:56:48,900 [INFO] Solving instance with 5 tasks
+2025-12-09 08:56:48,900 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:56:48,919 [INFO] Solved. Obj=63.00
+2025-12-09 08:56:48,920 [INFO] Received solution with 5 items
+2025-12-09 08:56:59,470 [INFO] Solving instance with 5 tasks
+2025-12-09 08:56:59,472 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:56:59,477 [INFO] Solved. Obj=805.00
+2025-12-09 08:56:59,478 [INFO] Received solution with 5 items
+2025-12-09 08:57:12,764 [INFO] Solving instance with 5 tasks
+2025-12-09 08:57:12,764 [INFO] Set parameter TimeLimit to value 30
+2025-12-09 08:57:12,780 [INFO] Solved. Obj=102.00
+2025-12-09 08:57:12,781 [INFO] Received solution with 5 items

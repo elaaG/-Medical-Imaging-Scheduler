@@ -1,0 +1,5 @@
+2025-12-08 17:28:00,102 [INFO] Solving instance with 6 tasks
+2025-12-08 17:28:00,109 [INFO] Restricted license - for non-production use only - expires 2027-11-29
+2025-12-08 17:28:00,130 [ERROR] Solver error: must be real number, not str
+2025-12-08 17:28:18,448 [INFO] Solving instance with 7 tasks
+2025-12-08 17:28:18,467 [ERROR] Solver error: must be real number, not str

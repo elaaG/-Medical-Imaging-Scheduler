@@ -1,5 +1,7 @@
 import json
 import logging
+from PySide6.QtWidgets import QComboBox
+
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, 
     QTableWidget, QTableWidgetItem, QFileDialog, QMessageBox, QHeaderView, 
@@ -16,8 +18,9 @@ logger = logging.getLogger(__name__)
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Scheduler - Imagerie Médicale (Pro)')
-        self.resize(800, 800)
+        self.setWindowTitle('Scheduler - Imagerie Médicale 🏥')
+        self.resize(500, 690)
+
         self._apply_styles()
 
         central = QWidget()
@@ -39,13 +42,21 @@ class MainWindow(QMainWindow):
         self.pdf_btn = QPushButton('📄 Export PDF')
         self.pdf_btn.clicked.connect(self.export_pdf)
         self.pdf_btn.setEnabled(False)
+        self.obj_selector = QComboBox()
+        self.obj_selector.addItems([
+            "Weighted completion", 
+            "Makespan", 
+            "Multi-criteria (makespan + staff)"
+        ])
+        toolbar.addWidget(QLabel("Objectif:"))
+        toolbar.addWidget(self.obj_selector)
+
 
         for w in [add_btn, load_btn, load_json_btn, export_json_btn, self.solve_btn, self.pdf_btn]:
             toolbar.addWidget(w)
         toolbar.addStretch()
         v.addLayout(toolbar)
 
-        # --- Table ---
         self.table = QTableWidget(0, 9)
         headers = ['ID','Durée','Machine','Priorité','Release','Deadline','StaffGroup','SetupAfter(JSON)','Notes']
         self.table.setHorizontalHeaderLabels(headers)
@@ -157,17 +168,16 @@ class MainWindow(QMainWindow):
         r = self.table.rowCount()
         self.table.insertRow(r)
         self.table.setItem(r,0, QTableWidgetItem(f'P{r+1}'))
-        self.table.setItem(r,1, QTableWidgetItem('20'))
+        self.table.setItem(r,1, QTableWidgetItem('20.0'))  
         self.table.setItem(r,2, QTableWidgetItem('IRM1'))
-        self.table.setItem(r,3, QTableWidgetItem('1'))
-        self.table.setItem(r,4, QTableWidgetItem('0'))
-        self.table.setItem(r,5, QTableWidgetItem(''))
+        self.table.setItem(r,3, QTableWidgetItem('1.0'))
+        self.table.setItem(r,4, QTableWidgetItem('0.0'))
+        self.table.setItem(r,5, QTableWidgetItem(''))  
         self.table.setItem(r,6, QTableWidgetItem('TechA'))
-        self.table.setItem(r,7, QTableWidgetItem('{}'))
-        self.table.setItem(r,8, QTableWidgetItem(''))
-        
+        self.table.setItem(r,7, QTableWidgetItem('{}'))  
+        self.table.setItem(r,8, QTableWidgetItem(''))  
 
-    # --- Lod example ---
+    # --- Load example ---
     def load_example(self):
         sample = [
             {"id":"P1","duration":20,"machine":"IRM1","priority":5,"release":0,"staff_group":"TechA"},
@@ -182,16 +192,14 @@ class MainWindow(QMainWindow):
             r = self.table.rowCount()
             self.table.insertRow(r)
             self.table.setItem(r,0,QTableWidgetItem(t['id']))
-            self.table.setItem(r,1,QTableWidgetItem(str(t['duration'])))
+            self.table.setItem(r,1,QTableWidgetItem(str(float(t['duration']))))
             self.table.setItem(r,2,QTableWidgetItem(t['machine']))
-            self.table.setItem(r,3,QTableWidgetItem(str(t['priority'])))
-            self.table.setItem(r,4,QTableWidgetItem(str(t.get('release',0))))
+            self.table.setItem(r,3,QTableWidgetItem(str(float(t['priority']))))
+            self.table.setItem(r,4,QTableWidgetItem(str(float(t.get('release',0)))))
             self.table.setItem(r,5,QTableWidgetItem(str(t.get('deadline',''))))
             self.table.setItem(r,6,QTableWidgetItem(t.get('staff_group','')))
             self.table.setItem(r,7,QTableWidgetItem(json.dumps(t.get('setup_after',{}))))
             self.table.setItem(r,8,QTableWidgetItem(''))
-        
-
 
     def import_json(self):
         path, _ = QFileDialog.getOpenFileName(self, 'Ouvrir JSON', '', 'JSON Files (*.json)')
@@ -204,17 +212,18 @@ class MainWindow(QMainWindow):
                 r = self.table.rowCount()
                 self.table.insertRow(r)
                 self.table.setItem(r,0,QTableWidgetItem(str(t.get('id',''))))
-                self.table.setItem(r,1,QTableWidgetItem(str(t.get('duration',''))))
+                self.table.setItem(r,1,QTableWidgetItem(str(float(t.get('duration',1.0)))))
                 self.table.setItem(r,2,QTableWidgetItem(str(t.get('machine',''))))
-                self.table.setItem(r,3,QTableWidgetItem(str(t.get('priority',1))))
-                self.table.setItem(r,4,QTableWidgetItem(str(t.get('release',0))))
+                self.table.setItem(r,3,QTableWidgetItem(str(float(t.get('priority',1.0)))))
+                self.table.setItem(r,4,QTableWidgetItem(str(float(t.get('release',0.0)))))
                 self.table.setItem(r,5,QTableWidgetItem(str(t.get('deadline',''))))
                 self.table.setItem(r,6,QTableWidgetItem(str(t.get('staff_group',''))))
                 self.table.setItem(r,7,QTableWidgetItem(json.dumps(t.get('setup_after',{}))))
                 self.table.setItem(r,8,QTableWidgetItem(''))
-            
         except Exception as e:
             QMessageBox.critical(self,'Erreur import',str(e))
+
+   
 
     def export_json(self):
         tasks = self.read_table_tasks()
@@ -223,47 +232,78 @@ class MainWindow(QMainWindow):
         if not path: return
         export_json(tasks, path)
         QMessageBox.information(self,'Export','Exporté avec succès')
-
+    
+    
     def read_table_tasks(self):
         tasks = []
         for r in range(self.table.rowCount()):
             try:
-                tid = self.table.item(r,0).text() if self.table.item(r,0) else f'P{r+1}'
-                duration = float(self.table.item(r,1).text()) if self.table.item(r,1) else 1.0
-                machine = self.table.item(r,2).text() if self.table.item(r,2) else 'M1'
-                priority = float(self.table.item(r,3).text()) if self.table.item(r,3) else 1.0
-                release = float(self.table.item(r,4).text()) if self.table.item(r,4) and self.table.item(r,4).text()!='' else 0.0
-                deadline = self.table.item(r,5).text() if self.table.item(r,5) and self.table.item(r,5).text()!='' else None
-                staff_group = self.table.item(r,6).text() if self.table.item(r,6) else None
-                setup_json = self.table.item(r,7).text() if self.table.item(r,7) else '{}'
-                setup_after = json.loads(setup_json)
-                tasks.append({
+                tid = self.table.item(r, 0).text().strip() if self.table.item(r, 0) else f'P{r+1}'
+                duration = self._to_float(self.table.item(r, 1).text(), default=1.0)
+                machine = self.table.item(r, 2).text().strip() if self.table.item(r, 2) else 'M1'
+                priority = self._to_float(self.table.item(r, 3).text(), default=1.0)
+                release = self._to_float(self.table.item(r, 4).text(), default=0.0)
+                deadline_text = self.table.item(r, 5).text().strip() if self.table.item(r, 5) else ''
+                deadline = None
+                if deadline_text:
+                    deadline = self._to_float(deadline_text, default=None)
+                staff_group = self.table.item(r, 6).text().strip() if self.table.item(r, 6) else None
+                setup_json = self.table.item(r, 7).text() if self.table.item(r, 7) else '{}'
+                try:
+                    setup_after = json.loads(setup_json)
+                    if not isinstance(setup_after, dict):
+                        raise ValueError("setup_after must be a JSON object")
+                except Exception:
+                    setup_after = {}
+                setup_after_float = {str(k): self._to_float(v, default=0.0) for k,v in setup_after.items()}
+                task_dict = {
                     'id': tid,
                     'duration': duration,
                     'machine': machine,
                     'priority': priority,
                     'release': release,
-                    'deadline': float(deadline) if deadline not in (None,'') else None,
-                    'staff_group': staff_group if staff_group not in (None,'') else None,
-                    'setup_after': setup_after
-                })
+                    'staff_group': staff_group,
+                    'setup_after': setup_after_float
+                }
+                if deadline is not None:
+                    task_dict['deadline'] = deadline
+                tasks.append(task_dict)
             except Exception as e:
                 QMessageBox.warning(self,'Erreur données',f'Ligne {r+1} invalide: {e}')
                 return []
         return tasks
 
-    # --- Solve ---
+    def _to_float(self, val, default=0.0):
+        """
+        Convert a value to float safely.
+        If conversion fails, return default.
+        """
+        if val is None or str(val).strip() == '':
+            return default
+        try:
+            return float(val)
+        except (ValueError, TypeError):
+            return default
+
     def start_solve(self):
         from .model import solve_multi_machine
         tasks = self.read_table_tasks()
         if not tasks: return
         self.solve_btn.setEnabled(False)
         self.progress.setVisible(True)
-        self.thread = SolveThread(tasks)
+        # get selected objective
+        obj_map = {
+            "Weighted completion": "weighted_completion",
+            "Makespan": "makespan",
+            "Multi-criteria (makespan + staff)": "multi_criteria"
+        }
+        selected_obj = obj_map.get(self.obj_selector.currentText(), "weighted_completion")
+        self.thread = SolveThread(tasks, objective=selected_obj)
         self.thread.finished_signal.connect(self.on_solved)
         self.thread.error_signal.connect(self.on_error)
         self.thread.start()
-        self.info.setText('Résolution en cours...')
+
+        self.info.setText(f'Résolution en cours... Objectif: {self.obj_selector.currentText()}')
 
     def on_solved(self, solution, obj):
         logger.info('Received solution with %d items', len(solution))
