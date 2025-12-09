@@ -1,7 +1,0 @@
-[
-    {"id": "A", "duration": 40, "machine": "M1", "priority": 1, "release": 0, "deadline": 200},
-    {"id": "B", "duration": 5,  "machine": "M1", "priority": 10, "release": 0, "deadline": 20},
-    {"id": "C", "duration": 25, "machine": "M1", "priority": 8,  "release": 0, "deadline": 60},
-    {"id": "D", "duration": 30, "machine": "M1", "priority": 3,  "release": 10, "deadline": 150},
-    {"id": "E", "duration": 3,  "machine": "M1", "priority": 20, "release": 0, "deadline": 10}
-]
